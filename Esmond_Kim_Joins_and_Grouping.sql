@@ -48,29 +48,26 @@ order by `# Sold` desc
 -- The second column should be titled “# Orders” and the third should be “Total Sales”. Sort the output by Total Sales descending. Only (and all) 
 -- employees with the job title ‘Sales Rep’ should be included in the output, and if the employee made no sales the Total Sales should display as “0.00”.
 select concat(e.lastName, ', ', e.firstName) as `Sales Rep`, sum(od.quantityOrdered) as `# Orders`, 
-if(sum(od.quantityOrdered*od.priceEach) > 0.00, sum(od.quantityOrdered*od.priceEach), 0.00) as `Total Sales`
+if(sum(od.quantityOrdered) IS null, format(0.00, 2), sum(od.quantityOrdered*od.priceEach)) as `Total Sales`
 from employees as e
 left join customers as c on e.employeeNumber = c.salesRepEmployeeNumber
-join orders as o on c.customerNumber = o.customerNumber
-join orderdetails as od on o.orderNumber = od.orderNumber
+left join orders as o on c.customerNumber = o.customerNumber
+left join orderdetails as od on o.orderNumber = od.orderNumber
 where e.jobTitle = 'Sales Rep'
--- group by `Sales Rep`
--- order by `Total Sales` desc
+group by `Sales Rep`
+order by `Total Sales` desc
 ;
-select concat(e.lastName, ', ', e.firstName)  
-from employees as e
-join customers as c on e.employeeNumber = c.salesRepEmployeeNumber 
 
 -- Question 6
 -- 6. Your product team is requesting data to help them create a bar-chart of monthly sales since the company’s inception. 
 -- Write a query to output the month (January, February, etc.), 4-digit year, and total sales for that month. The first column 
 -- should be labeled ‘Month’, the second ‘Year’, and the third should be ‘Payments Received’. Values in the third column should 
 -- be formatted as numbers with two decimals – for example: 694,292.68.
-select month(p.paymentdate) as `Month`, year(p.paymentdate) as `Year`, format(sum(p.amount), 2) as `Payments Received` 
-from payments as p
-group by `Month`
-order by `Month` asc
-;
+ SELECT DATE_FORMAT(p.paymentDate, "%M") AS "Month", 
+		DATE_FORMAT(p.paymentDate, "%Y") AS "Year", 
+        FORMAT(SUM(amount), 2) AS "Payments Received"
+ FROM payments as p
+ GROUP BY YEAR(p.paymentDate), MONTH(p.paymentDate);
 
 
 
